@@ -1,7 +1,6 @@
-import dataclasses
 from typing import List
 
-import inquirer
+import questionary
 
 from utils.Config import Config
 from utils.Playlist import Playlist, Video, AudioTrack, SubTrack
@@ -19,83 +18,62 @@ NO_ANSWER = 'Нет'
 
 
 def prompt_resume():
-    resume = [
-        inquirer.List(
-            'resume',
-            message=RESUME_PROMPT,
-            choices=[
-                YES_ANSWER,
-                NO_ANSWER
-            ],
-            default=YES_ANSWER
-        )
-    ]
+    resume = questionary.select(
+        'resume',
+        message=RESUME_PROMPT,
+        choices=[
+            YES_ANSWER,
+            NO_ANSWER
+        ],
+        default=YES_ANSWER
+    ).ask()
 
-    return inquirer.prompt(resume)['resume'] == YES_ANSWER
+    return resume == YES_ANSWER
 
 
 def prompt_playlist_link() -> str:
-    link = input(LINK_PROMPT)
+    link = questionary.text(LINK_PROMPT).ask()
+    print(link)
     return link.replace("\\", "")
 
 
 def prompt_video_name():
-    name = input(NAME_PROMPT)
+    name = questionary.text(NAME_PROMPT).ask()
     return name
 
 
 def prompt_video_params(video_list: List[Video]) -> (str, Video):
-    choices = [(video.view, video) for video in video_list]
-    question = inquirer.List('video', message='Please select a video resolution:', choices=choices)
+    choices = [questionary.Choice(video.view, value=video) for video in video_list]
+    answer = questionary.select('Please select a video resolution:', choices=choices).ask()
 
-    answers = inquirer.prompt([question])
-    return answers['video']
+    return answer
 
 
 def prompt_audio_tracks(audio_list: List[AudioTrack], video: Video, selected_audio: List[AudioTrack] | None) \
         -> (str, List[AudioTrack]):
-    choices = [(audio.view, audio) for audio in audio_list]
+    choices = [questionary.Choice(
+        audio.view,
+        value=audio,
+        checked=audio.group_id == video.group_id and ('RUS' in audio.name or 'ENG' in audio.name))
+        for audio in audio_list]
 
-    if selected_audio:
-        default_choices = [audio for audio in audio_list if audio in selected_audio]
-    else:
-        default_choices = [audio for audio in audio_list
-                           if audio.group_id == video.group_id
-                           and ('RUS' in audio.name or 'ENG' in audio.name)]
+    answers = questionary.checkbox(
+        AUDIO_PROMPT,
+        choices=choices,
+    ).ask()
 
-    questions = [
-        inquirer.Checkbox(
-            'audio',
-            message=AUDIO_PROMPT,
-            choices=choices,
-            default=default_choices
-        )
-    ]
-
-    answers = inquirer.prompt(questions)
-    return answers['audio']
+    return answers
 
 
 def prompt_subs_tracks(sub_list: List[SubTrack], selected_subs: List[SubTrack] | None) -> (str, List[SubTrack]):
-    choices = [(sub.view, sub) for sub in sub_list]
+    choices = [questionary.Choice(sub.view, value=sub, checked=sub.name.startswith(("RUS", "ENG"))) for sub in sub_list]
 
-    if selected_subs:
-        default_choices = [sub for sub in sub_list if sub in selected_subs]
-    else:
-        default_choices = [sub for sub in sub_list
-                           if sub.name.startswith(("RUS", "ENG"))]
+    answers = questionary.checkbox(
+        SUBS_PROMPT,
+        choices=choices,
+    ).ask()
 
-    questions = [
-        inquirer.Checkbox(
-            'subs',
-            message=SUBS_PROMPT,
-            choices=choices,
-            default=default_choices
-        )
-    ]
-
-    answers = inquirer.prompt(questions)
-    return answers['subs']
+    return answers
 
 
 def prompt_params():
@@ -114,7 +92,8 @@ def prompt_params():
     if not selected_video:
         exit(1)
 
-    selected_audio = prompt_audio_tracks(playlist.audios, selected_video, config.selected_audio) if playlist.audios else None
+    selected_audio = prompt_audio_tracks(playlist.audios, selected_video,
+                                         config.selected_audio) if playlist.audios else None
     config.set_audio(selected_audio)
 
     selected_subs = prompt_subs_tracks(playlist.subs, config.selected_subs) if playlist.subs else None
