@@ -4,7 +4,7 @@ from typing import List
 import inquirer
 
 from utils.Config import Config
-from utils.Playlist import Playlist, convert_to_video, convert_to_audio, Video, convert_to_sub, AudioTrack, SubTrack
+from utils.Playlist import Playlist, Video, AudioTrack, SubTrack
 
 RESUME_PROMPT = 'Найдена незаконченная загрузка. Продолжить?'
 LINK_PROMPT = 'Введите ссылку: '

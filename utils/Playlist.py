@@ -1,7 +1,11 @@
+import re
 from dataclasses import dataclass, field
 from urllib.parse import urlparse, urlunsplit
 
 import m3u8
+from yt_dlp.utils import urljoin
+
+LANGUAGE_PATTERN = r'\(([A-Z]{3})\)'
 
 
 class Playlist:
@@ -9,6 +13,7 @@ class Playlist:
         self._subs = None
         self._audios = None
         self._videos = None
+        self._host: str | None = None
 
         self.link = link
         self.get_playlist_info()
@@ -16,11 +21,15 @@ class Playlist:
     def get_playlist_info(self):
         playlist = m3u8.load(self.link)
         self._videos = playlist.data.get('playlists', None)
+        self._host = self.extract_host_from_video()
 
         media = playlist.data.get('media', [])
 
         self._audios = [track for track in media if track['type'] == 'AUDIO']
         self._subs = [track for track in media if track['type'] == 'SUBTITLES']
+
+    def extract_host_from_video(self):
+        return get_playlist_host(self.videos[0].url)
 
     @property
     def videos(self):
@@ -32,7 +41,7 @@ class Playlist:
 
     @property
     def subs(self):
-        return [convert_to_sub(sub) for sub in self._subs] if self._subs else None
+        return [convert_to_sub(sub, self._host) for sub in self._subs] if self._subs else None
 
 
 @dataclass
@@ -67,6 +76,12 @@ class AudioTrack:
     def view(self):
         return f"{self.name} ({self.group_id})"
 
+    @property
+    def language(self):
+        result = re.search(LANGUAGE_PATTERN, self.name)
+
+        return result.group(1).lower() if result else 'und'
+
 
 def convert_to_audio(m3u8_media_entry) -> AudioTrack:
     if not m3u8_media_entry:
@@ -88,14 +103,18 @@ class SubTrack:
     def view(self):
         return self.name
 
+    @property
+    def language(self):
+        return self.name[:3].lower()
 
-def convert_to_sub(m3u8_media_entry) -> SubTrack:
+
+def convert_to_sub(m3u8_media_entry, host: str) -> SubTrack:
     if not m3u8_media_entry:
         raise ValueError('m3u8_media_entry is None')
     return SubTrack(
         name=m3u8_media_entry['name'],
         group_id=m3u8_media_entry['group_id'],
-        url=m3u8_media_entry['uri']
+        url=urljoin(host, m3u8_media_entry['uri'])
     )
 
 

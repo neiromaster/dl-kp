@@ -7,18 +7,21 @@ from utils.Playlist import Video, AudioTrack, SubTrack
 class Config:
     def __init__(self):
         self.link: str | None = None
+        self.host: str | None = None
         self.name: str | None = None
         self.selected_video: Video | None = None
         self.selected_audio: List[AudioTrack] | None = None
         self.selected_subs: List[SubTrack] | None = None
 
     def from_json(self, config):
-        self.link = config.get('link')
-        self.name = config.get('name')
-        self.selected_video = Video(**config.get('selected_video', {}))
-        self.selected_audio = [AudioTrack(**audio)
-                               for audio in config.get('selected_audio', []) or []]
-        self.selected_subs = [SubTrack(**sub) for sub in config.get('selected_subs', []) or []]
+        self.set_link(config.get('link'))
+        self.set_name(config.get('name'))
+        self.set_video(Video(**config.get('selected_video', {})))
+
+        self.set_audio([AudioTrack(**audio)
+                        for audio in config.get('selected_audio', []) or []])
+        self.set_subs([SubTrack(**sub)
+                       for sub in config.get('selected_subs', []) or []])
         return self
 
     def to_json(self):

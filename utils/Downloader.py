@@ -1,16 +1,12 @@
-from pprint import pprint
-from urllib.parse import urljoin
-
 import yt_dlp
+
 from utils.Config import Config
-from utils.Playlist import get_playlist_host
 from utils.retry import retry
 
 
-class YtDLP:
+class Downloader:
     def __init__(self, config: Config):
         self.name = config.name
-        self.host = get_playlist_host(config.link)
         self.selected_video = config.selected_video
         self.selected_audio = config.selected_audio
         self.selected_subs = config.selected_subs
@@ -20,13 +16,15 @@ class YtDLP:
             'skip_unavailable_fragments': False,
             'fragment_retries': 50,
             'retries': 50,
+            'external_downloader': {'default': 'aria2c'},
+            'external_downloader_args': {'aria2c': ['-x', '5', '-s', '5']},
+
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                               'AppleWebKit/537.36 (KHTML, like Gecko) '
                               'Chrome/103.0.0.0 Safari/537.36'
             }
         }
-        pprint(self.options, indent=4)
 
     def download_video(self, video):
         options = self.options
@@ -56,7 +54,7 @@ class YtDLP:
                 'outtmpl': output_template,
             }
             downloader = yt_dlp.YoutubeDL(ydl_opts)
-            retry(max_attempts=10, func=downloader.download, url_list=[urljoin(self.host, track.url)])
+            retry(max_attempts=10, func=downloader.download, url_list=[track.url])
 
     def download(self):
         self.download_video(self.selected_video)
