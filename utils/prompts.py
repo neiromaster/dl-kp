@@ -19,7 +19,7 @@ NO_ANSWER = "Нет"
 
 def prompt_resume():
     resume = questionary.select(
-        message=RESUME_PROMPT,
+        RESUME_PROMPT,
         choices=[YES_ANSWER, NO_ANSWER],
         default=YES_ANSWER,
     ).ask()
@@ -28,13 +28,13 @@ def prompt_resume():
 
 
 def prompt_playlist_link() -> str:
-    link = questionary.text(LINK_PROMPT).ask()
+    link = input(LINK_PROMPT)
     print(link)
     return link.replace("\\", "")
 
 
 def prompt_video_name():
-    name = questionary.text(NAME_PROMPT).ask()
+    name = input(NAME_PROMPT)
     return name
 
 

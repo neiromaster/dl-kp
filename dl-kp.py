@@ -33,7 +33,7 @@ def convert_to_mkv(config: Config):
                 f"0:{track.language}",
                 f"{name}/{name}-audio-{index}.mp4",
             ]
-            for index, track in enumerate(audio)
+            for index, track in enumerate(audio or [])
         ],
         [],
     )
@@ -48,7 +48,7 @@ def convert_to_mkv(config: Config):
                 f"0:{track.language}",
                 f"{name}/{name}-subs-{index}.mp4",
             ]
-            for index, track in enumerate(subs)
+            for index, track in enumerate(subs or [])
         ],
         [],
     )
