@@ -14,24 +14,35 @@ class Config:
         self.selected_subs: List[SubTrack] | None = None
 
     def from_json(self, config):
-        self.set_link(config.get('link'))
-        self.set_name(config.get('name'))
-        self.set_video(Video(**config.get('selected_video', {})))
+        self.set_link(config.get("link"))
+        self.set_name(config.get("name"))
+        self.set_video(Video(**config.get("selected_video", {})))
 
-        self.set_audio([AudioTrack(**audio)
-                        for audio in config.get('selected_audio', []) or []])
-        self.set_subs([SubTrack(**sub)
-                       for sub in config.get('selected_subs', []) or []])
+        self.set_audio(
+            [AudioTrack(**audio) for audio in config.get("selected_audio", []) or []]
+        )
+        self.set_subs(
+            [SubTrack(**sub) for sub in config.get("selected_subs", []) or []]
+        )
         return self
 
     def to_json(self):
         return {
-            'link': self.link,
-            'name': self.name,
-            'selected_video': dataclasses.asdict(self.selected_video) if self.selected_video else None,
-            'selected_audio': [dataclasses.asdict(audio)
-                               for audio in self.selected_audio] if self.selected_audio else None,
-            'selected_subs': [dataclasses.asdict(sub) for sub in self.selected_subs] if self.selected_subs else None
+            "link": self.link,
+            "name": self.name,
+            "selected_video": (
+                dataclasses.asdict(self.selected_video) if self.selected_video else None
+            ),
+            "selected_audio": (
+                [dataclasses.asdict(audio) for audio in self.selected_audio]
+                if self.selected_audio
+                else None
+            ),
+            "selected_subs": (
+                [dataclasses.asdict(sub) for sub in self.selected_subs]
+                if self.selected_subs
+                else None
+            ),
         }
 
     def set_link(self, link: str):

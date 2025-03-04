@@ -5,44 +5,25 @@ from utils.retry import retry
 
 
 class Downloader:
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, yt_dlp_config: dict):
         self.name = config.name
         self.selected_video = config.selected_video
         self.selected_audio = config.selected_audio
         self.selected_subs = config.selected_subs
 
-        self.options = {
-            'concurrent_fragment_downloads': 5,
-            'skip_unavailable_fragments': False,
-            'fragment_retries': 50,
-            'retries': 50,
-            'external_downloader': {'default': 'aria2c'},
-            'external_downloader_args': {'aria2c': ['-x', '5', '-s', '5']},
-
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                              'AppleWebKit/537.36 (KHTML, like Gecko) '
-                              'Chrome/103.0.0.0 Safari/537.36'
-            }
-        }
+        self.options = yt_dlp_config
 
     def download_video(self, video):
         options = self.options
         output_template = f"{self.name}/{self.name}.mp4"
-        ydl_opts = {
-            **options,
-            'outtmpl': output_template
-        }
+        ydl_opts = {**options, "outtmpl": output_template}
         downloader = yt_dlp.YoutubeDL(ydl_opts)
         retry(max_attempts=10, func=downloader.download, url_list=[video.url])
 
     def download_audio(self, audio):
         for index, track in enumerate(audio):
             output_template = f"{self.name}/{self.name}-audio-{index}.mp4"
-            ydl_opts = {
-                **self.options,
-                'outtmpl': output_template
-            }
+            ydl_opts = {**self.options, "outtmpl": output_template}
             downloader = yt_dlp.YoutubeDL(ydl_opts)
             retry(max_attempts=10, func=downloader.download, url_list=[track.url])
 
@@ -51,7 +32,7 @@ class Downloader:
             output_template = f"{self.name}/{self.name}-subs-{index}.mp4"
             ydl_opts = {
                 **self.options,
-                'outtmpl': output_template,
+                "outtmpl": output_template,
             }
             downloader = yt_dlp.YoutubeDL(ydl_opts)
             retry(max_attempts=10, func=downloader.download, url_list=[track.url])
