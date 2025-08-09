@@ -16,17 +16,26 @@ class Config:
         self.selected_audio: List[AudioTrack] | None = None
         self.selected_subs: List[SubTrack] | None = None
 
-    def from_json(self, config):
-        self.set_link(config.get("link"))
-        self.set_name(config.get("name"))
-        self.set_video(Video(**config.get("selected_video", {})))
+    def from_json(self, data: dict):
+        self.set_link(data.get("link"))
+        self.set_name(data.get("name"))
 
-        self.set_audio(
-            [AudioTrack(**audio) for audio in config.get("selected_audio", []) or []]
-        )
-        self.set_subs(
-            [SubTrack(**sub) for sub in config.get("selected_subs", []) or []]
-        )
+        video_data = data.get("selected_video")
+        if video_data:
+            self.set_video(Video(**video_data))
+
+        audio_data_list = data.get("selected_audio")
+        if audio_data_list:
+            self.set_audio([AudioTrack(**audio) for audio in audio_data_list])
+        else:
+            self.set_audio([])
+
+        subs_data_list = data.get("selected_subs")
+        if subs_data_list:
+            self.set_subs([SubTrack(**sub) for sub in subs_data_list])
+        else:
+            self.set_subs([])
+
         return self
 
     def to_json(self):
