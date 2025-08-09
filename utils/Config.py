@@ -1,7 +1,12 @@
+from __future__ import annotations
 import dataclasses
+import json
+import os
 from typing import List
 
 from utils.Playlist import Video, AudioTrack, SubTrack
+
+DL_KP_CONFIG_FILE = "dl-kp.json"
 
 
 class Config:
@@ -44,6 +49,18 @@ class Config:
                 else None
             ),
         }
+
+    def save(self):
+        with open(DL_KP_CONFIG_FILE, "w") as config_file:
+            json.dump(self.to_json(), config_file)
+
+    @classmethod
+    def load(cls) -> "Config" | None:
+        if not os.path.exists(DL_KP_CONFIG_FILE):
+            return None
+        with open(DL_KP_CONFIG_FILE) as config_file:
+            config_data = json.load(config_file)
+        return cls().from_json(config_data)
 
     def set_link(self, link: str):
         self.link = link
