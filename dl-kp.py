@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import configparser
 
 import yaml
@@ -15,6 +16,18 @@ DL_KP_CONFIG_FILE = "dl-kp.json"
 YT_DLP_CONFIG_FILE = "dl-kp.yaml"
 
 DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/237.84.2.178 Safari/537.36"
+
+
+def check_dependencies():
+    required_apps = ["mkvmerge"]
+    missing_apps = [app for app in required_apps if not shutil.which(app)]
+
+    if missing_apps:
+        print("Следующие приложения не найдены:")
+        for app in missing_apps:
+            print(f"- {app}")
+        print("Пожалуйста, установите их и попробуйте снова.")
+        sys.exit(1)
 
 
 def convert_to_mkv(config: Config):
@@ -83,6 +96,7 @@ def load_settings() -> Config | None:
 
 
 def main():
+    check_dependencies()
     config = load_settings()
     if config:
         if not prompt_resume():
