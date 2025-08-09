@@ -20,7 +20,7 @@ class Playlist:
         self.get_playlist_info()
 
     def get_playlist_info(self):
-        playlist = m3u8.load(self.link, headers=self.headers)
+        playlist = m3u8.load(self.link, headers=self.headers, verify_ssl=False)
         self._videos = playlist.data.get("playlists", None)
         self._host = self.extract_host_from_video()
 
