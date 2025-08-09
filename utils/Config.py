@@ -6,8 +6,6 @@ from typing import List
 
 from utils.Playlist import Video, AudioTrack, SubTrack
 
-DL_KP_CONFIG_FILE = "dl-kp.json"
-
 
 class Config:
     def __init__(self):
@@ -50,15 +48,15 @@ class Config:
             ),
         }
 
-    def save(self):
-        with open(DL_KP_CONFIG_FILE, "w") as config_file:
+    def save(self, filepath: str):
+        with open(filepath, "w") as config_file:
             json.dump(self.to_json(), config_file)
 
     @classmethod
-    def load(cls) -> "Config" | None:
-        if not os.path.exists(DL_KP_CONFIG_FILE):
+    def load(cls, filepath: str) -> "Config" | None:
+        if not os.path.exists(filepath):
             return None
-        with open(DL_KP_CONFIG_FILE) as config_file:
+        with open(filepath) as config_file:
             config_data = json.load(config_file)
         return cls().from_json(config_data)
 

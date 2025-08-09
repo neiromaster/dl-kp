@@ -14,6 +14,7 @@ from utils.prompts import prompt_resume, prompt_params
 from utils.system import check_dependencies
 from utils.video import convert_to_mkv
 
+DL_KP_CONFIG_FILE = "dl-kp.json"
 YT_DLP_CONFIG_FILE = "dl-kp.yaml"
 
 DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/237.84.2.178 Safari/537.36"
@@ -21,10 +22,10 @@ DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.
 
 def main():
     check_dependencies()
-    config = Config.load()
+    config = Config.load(DL_KP_CONFIG_FILE)
     if config:
         if not prompt_resume():
-            os.remove("dl-kp.json")
+            os.remove(DL_KP_CONFIG_FILE)
             config = None
 
     with open("dl-kp.yaml", "r", encoding="utf-8") as file:
@@ -32,7 +33,7 @@ def main():
 
     config = config if config else prompt_params(dl_kp_config["m3u8"]["http_headers"])
 
-    config.save()
+    config.save(DL_KP_CONFIG_FILE)
 
     ydl = Downloader(config, yt_dlp_config=dl_kp_config["yt-dlp"])
     try:
@@ -42,7 +43,7 @@ def main():
 
         if config.name:
             shutil.rmtree(config.name)
-            os.remove("dl-kp.json")
+            os.remove(DL_KP_CONFIG_FILE)
     except DownloadError:
         print("Попробуйте перезапустить скрипт")
         exit(1)
