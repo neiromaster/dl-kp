@@ -1,0 +1,52 @@
+yt-dlp:
+  # Number of dash/hlsnative video fragments to download simultaneously (default 1).
+  concurrent_fragment_downloads: 5
+
+  # Skip unavailable fragments
+  skip_unavailable_fragments: false
+
+  # Number of retries for each fragment
+  fragment_retries: 50
+
+  # Total number of retries
+  retries: 50
+
+  external_downloader:
+    # Default external downloader
+    default: "aria2c"
+    dash: "native"
+    m3u8: "native"
+
+  external_downloader_args:
+    aria2c:
+      # Maximum number of connections to each server
+      - "-x"
+      - "5"
+      # Minimum number of peers for parallel download
+      - "-s"
+      - "5"
+
+  # Clean filenames for Windows
+  windows_filenames: true
+
+  # Write subtitles or auto-generated subtitles
+  #  write_subs: true
+
+  # Embed subtitles
+  embed_subs: true
+
+  # Embed metadata
+  embed_metadata: true
+
+  # Download all audio streams
+  audio_multistreams: true
+
+  http_headers:
+    # User-Agent string for HTTP requests
+    User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
+    Referer: "https://id.vk.com/"
+
+
+m3u8:
+  http_headers:
+    User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
