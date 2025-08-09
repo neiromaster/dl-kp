@@ -4,11 +4,7 @@ import shutil
 import subprocess
 import configparser
 
-import ssl
-
 import yaml
-
-ssl._create_default_https_context = ssl._create_unverified_context
 
 from utils.Config import Config
 from utils.DownloadError import DownloadError
