@@ -54,7 +54,7 @@ jobs:
           poetry config virtualenvs.create false
 
       - name: Install dependencies
-        run: poetry install --with dev
+        run: poetry install --with dev --no-root
 
       - name: Build with PyInstaller
         run: |
