@@ -91,6 +91,10 @@ def prompt_params(headers: dict) -> Config:
     video_name = prompt_video_name()
     config.set_name(video_name)
 
+    if not playlist.videos:
+        print("В плейлисте не найдено доступных видео.")
+        exit(1)
+
     selected_video = prompt_video_params(playlist.videos)
     config.set_video(selected_video)
 

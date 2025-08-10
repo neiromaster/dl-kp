@@ -78,8 +78,8 @@ class Config:
     def set_video(self, video: Video):
         self.selected_video = video
 
-    def set_audio(self, audio: List[AudioTrack]):
+    def set_audio(self, audio: List[AudioTrack] | None):
         self.selected_audio = audio
 
-    def set_subs(self, subs: List[SubTrack]):
+    def set_subs(self, subs: List[SubTrack] | None):
         self.selected_subs = subs
