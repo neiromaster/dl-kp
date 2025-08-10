@@ -17,7 +17,7 @@ YES_ANSWER = "Да"
 NO_ANSWER = "Нет"
 
 
-def prompt_resume():
+def prompt_resume() -> bool:
     resume = questionary.select(
         RESUME_PROMPT,
         choices=[YES_ANSWER, NO_ANSWER],
@@ -29,27 +29,24 @@ def prompt_resume():
 
 def prompt_playlist_link() -> str:
     link = input(LINK_PROMPT)
-    print(link)
     return link.replace("\\", "")
 
 
-def prompt_video_name():
+def prompt_video_name() -> str:
     name = input(NAME_PROMPT)
     return name
 
 
-def prompt_video_params(video_list: List[Video]) -> (str, Video):
+def prompt_video_params(video_list: List[Video]) -> Video:
     choices = [questionary.Choice(video.view, value=video) for video in video_list]
-    answer = questionary.select(
-        "Please select a video resolution:", choices=choices
-    ).ask()
+    answer = questionary.select(RESOLUTION_PROMPT, choices=choices).ask()
 
     return answer
 
 
 def prompt_audio_tracks(
-    audio_list: List[AudioTrack], video: Video, selected_audio: List[AudioTrack] | None
-) -> (str, List[AudioTrack]):
+    audio_list: List[AudioTrack], video: Video
+) -> List[AudioTrack]:
     choices = [
         questionary.Choice(
             audio.view,
@@ -68,9 +65,7 @@ def prompt_audio_tracks(
     return answers
 
 
-def prompt_subs_tracks(
-    sub_list: List[SubTrack], selected_subs: List[SubTrack] | None
-) -> (str, List[SubTrack]):
+def prompt_subs_tracks(sub_list: List[SubTrack]) -> List[SubTrack]:
     choices = [
         questionary.Choice(
             sub.view, value=sub, checked=sub.name.startswith(("RUS", "ENG"))
@@ -86,7 +81,7 @@ def prompt_subs_tracks(
     return answers
 
 
-def prompt_params(headers):
+def prompt_params(headers: dict) -> Config:
     config = Config()
 
     playlist_link = prompt_playlist_link()
@@ -103,17 +98,13 @@ def prompt_params(headers):
         exit(1)
 
     selected_audio = (
-        prompt_audio_tracks(playlist.audios, selected_video, config.selected_audio)
+        prompt_audio_tracks(playlist.audios, selected_video)
         if playlist.audios
         else None
     )
     config.set_audio(selected_audio)
 
-    selected_subs = (
-        prompt_subs_tracks(playlist.subs, config.selected_subs)
-        if playlist.subs
-        else None
-    )
+    selected_subs = prompt_subs_tracks(playlist.subs) if playlist.subs else None
     config.set_subs(selected_subs)
 
     return config
