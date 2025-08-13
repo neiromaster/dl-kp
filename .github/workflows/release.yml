@@ -1,0 +1,90 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }} for ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: x64
+          - os: ubuntu-latest
+            arch: arm64
+          - os: windows-latest
+            arch: x64
+          - os: windows-latest
+            arch: arm64
+          - os: macos-latest
+            arch: x64
+          - os: macos-latest
+            arch: arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU for arm64 on Linux
+        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'arm64'
+        uses: docker/setup-qemu-action@v3
+
+      - name: Install MKVToolNix
+        run: |
+          if [ "${{ runner.os }}" == "Linux" ]; then
+            sudo apt-get update
+            sudo apt-get install -y mkvtoolnix
+          elif [ "${{ runner.os }}" == "Windows" ]; then
+            choco install mkvtoolnix
+          elif [ "${{ runner.os }}" == "macOS" ]; then
+            brew install mkvtoolnix
+          fi
+        shell: bash
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install poetry
+        run: |
+          pip install poetry
+          poetry config virtualenvs.create false
+
+      - name: Install dependencies
+        run: poetry install --with dev --no-root
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller dl-kp.py --onefile --name "dl-kp-${{ runner.os }}-${{ matrix.arch }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dl-kp-${{ runner.os }}-${{ matrix.arch }}
+          path: dist/dl-kp-${{ runner.os }}-${{ matrix.arch }}*
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*/*
+          body: "Automated release for multiple platforms."
+          draft: false
+          prerelease: false
